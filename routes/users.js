@@ -184,29 +184,80 @@ router.post('/upload', function (req, res) {
             var pic = files.photo[0];
             pic.name = user._id + '_' + Date.now();
 
-            // var returnData = signS3(pic);
-            signS3(pic).then((returnData) => {
+            const s3 = new aws.S3();
+            const s3Params = {
+                Bucket: S3_BUCKET,
+                Key: pic.name,
+                Expires: 60,
+                ContentType: pic.type,
+                ACL: 'public-read'
+            };
+
+            s3.getSignedUrl('putObject', s3Params, (err, data) => {
+                if(err){
+                    console.log(err);
+                    return null;
+                }
+                const returnData = {
+                    signedRequest: data,
+                    url: `https://${S3_BUCKET}.s3.amazonaws.com/${pic.name}`
+                };
                 console.log(returnData);
-                uploadFile(pic, returnData.signedRequest, returnData.url);
 
-                user.pictures.push(returnData.url);
+                const xhr = new XMLHttpRequest();
+                xhr.open('PUT', returnData.signedRequest);
+                xhr.onreadystatechange = () => {
+                    if(xhr.readyState === 4){
+                        if(xhr.status === 200){
+                            user.pictures.push(returnData.url);
 
-                user.save(function (err, updatedUser) {
-                    if (err) {
-                        console.log(err);
-                        res.json({success: false, message: err});
-                        return null;
+                            user.save(function (err, updatedUser) {
+                                if (err) {
+                                    console.log(err);
+                                    res.json({success: false, message: err});
+                                    return null;
+                                }
+                                else {
+                                    updatedUser.password = null;
+                                    res.json({
+                                        success: true,
+                                        message: 'updated',
+                                        user: updatedUser
+                                    });
+                                }
+                            });
+                        }
+                        else{
+                            alert('Could not upload file.');
+                        }
                     }
-                    else {
-                        updatedUser.password = null;
-                        res.json({
-                            success: true,
-                            message: 'updated',
-                            user: updatedUser
-                        });
-                    }
-                });
+                };
+                xhr.send(file);
             });
+
+            // var returnData = signS3(pic);
+            // signS3(pic).then((returnData) => {
+            //     console.log(returnData);
+            //     // uploadFile(pic, returnData.signedRequest, returnData.url);
+            //
+            //     user.pictures.push(returnData.url);
+            //
+            //     user.save(function (err, updatedUser) {
+            //         if (err) {
+            //             console.log(err);
+            //             res.json({success: false, message: err});
+            //             return null;
+            //         }
+            //         else {
+            //             updatedUser.password = null;
+            //             res.json({
+            //                 success: true,
+            //                 message: 'updated',
+            //                 user: updatedUser
+            //             });
+            //         }
+            //     });
+            // });
 
             // var oldPath = pic.path;
             // var newPath = 'uploads/' + name;
@@ -239,7 +290,7 @@ router.post('/upload', function (req, res) {
     });
 });
 
-async function signS3 (file) {
+async function signS3 (file, user) {
     const s3 = new aws.S3();
     const s3Params = {
         Bucket: S3_BUCKET,
@@ -248,8 +299,9 @@ async function signS3 (file) {
         ContentType: file.type,
         ACL: 'public-read'
     };
+    let data = {};
 
-    await s3.getSignedUrl('putObject', s3Params, (err, data) => {
+    s3.getSignedUrl('putObject', s3Params, (err, data) => {
         if(err){
             console.log(err);
             return null;
@@ -259,7 +311,41 @@ async function signS3 (file) {
             url: `https://${S3_BUCKET}.s3.amazonaws.com/${file.name}`
         };
         console.log(returnData);
-        return JSON.stringify(returnData);
+
+        const xhr = new XMLHttpRequest();
+        console.log(file.name);
+        console.log(returnData.signedRequest);
+        console.log(returnData.url);
+        xhr.open('PUT', returnData.signedRequest);
+        xhr.onreadystatechange = () => {
+            if(xhr.readyState === 4){
+                if(xhr.status === 200){
+                    console.log(returnData.url);
+
+                    user.pictures.push(returnData.url);
+
+                    user.save(function (err, updatedUser) {
+                        if (err) {
+                            console.log(err);
+                            res.json({success: false, message: err});
+                            return null;
+                        }
+                        else {
+                            updatedUser.password = null;
+                            res.json({
+                                success: true,
+                                message: 'updated',
+                                user: updatedUser
+                            });
+                        }
+                    });
+                }
+                else{
+                    alert('Could not upload file.');
+                }
+            }
+        };
+        xhr.send(file);
     });
 }
 
