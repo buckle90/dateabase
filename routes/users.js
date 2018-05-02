@@ -3,10 +3,14 @@ var express = require('express');
 var config = require('../config');
 var router = express.Router();
 var multiparty = require('multiparty');
+var aws = require('aws-sdk');
 var fs = require('fs');
 var path = require('path');
 var jwt = require('jsonwebtoken');
 var User = require('../models/users');
+
+const S3_BUCKET = process.env.S3_BUCKET;
+aws.config.region = 'us-west-1';
 
 /* Create User */
 router.post('/create', function (req, res) {
@@ -177,38 +181,115 @@ router.post('/upload', function (req, res) {
 
         form.parse(req, function (err, fields, files) {
             var pic = files.photo[0];
-            var name = user._id + '_' + Date.now();
+            pic.name = user._id + '_' + Date.now();
 
-            var oldPath = pic.path;
-            var newPath = 'uploads/' + name;
-            fs.rename(oldPath, newPath, function (err) {
+            var returnData = signS3(pic);
+            uploadFile(pic, returnData.signedRequest, returnData.url);
+
+            user.pictures.push(returnData.url);
+
+            user.save(function (err, updatedUser) {
                 if (err) {
                     console.log(err);
                     res.json({success: false, message: err});
-                    return;
+                    return null;
                 }
-
-                user.pictures.push(name);
-
-                user.save(function (err, updatedUser) {
-                    if (err) {
-                        console.log(err);
-                        res.json({success: false, message: err});
-                        return null;
-                    }
-                    else {
-                        updatedUser.password = null;
-                        res.json({
-                            success: true,
-                            message: 'updated',
-                            user: updatedUser
-                        });
-                    }
-                });
+                else {
+                    updatedUser.password = null;
+                    res.json({
+                        success: true,
+                        message: 'updated',
+                        user: updatedUser
+                    });
+                }
             });
+
+            // var oldPath = pic.path;
+            // var newPath = 'uploads/' + name;
+            // fs.rename(oldPath, newPath, function (err) {
+            //     if (err) {
+            //         console.log(err);
+            //         res.json({success: false, message: err});
+            //         return;
+            //     }
+            //
+            //     user.pictures.push(name);
+            //
+            //     user.save(function (err, updatedUser) {
+            //         if (err) {
+            //             console.log(err);
+            //             res.json({success: false, message: err});
+            //             return null;
+            //         }
+            //         else {
+            //             updatedUser.password = null;
+            //             res.json({
+            //                 success: true,
+            //                 message: 'updated',
+            //                 user: updatedUser
+            //             });
+            //         }
+            //     });
+            // });
         });
     });
 });
+
+function signS3 (file) {
+    const s3 = new aws.S3();
+    const s3Params = {
+        Bucket: S3_BUCKET,
+        Key: file.name,
+        Expires: 60,
+        ContentType: file.type,
+        ACL: 'public-read'
+    };
+
+    s3.getSignedUrl('putObject', s3Params, (err, data) => {
+        if(err){
+            console.log(err);
+            return res.end();
+        }
+        const returnData = {
+            signedRequest: data,
+            url: `https://${S3_BUCKET}.s3.amazonaws.com/${fileName}`
+        };
+        return JSON.stringify(returnData);
+    });
+}
+
+// function getSignedRequest(file){
+//     const xhr = new XMLHttpRequest();
+//     xhr.open('GET', `/sign-s3?file-name=${file.name}&file-type=${file.type}`);
+//     xhr.onreadystatechange = () => {
+//         if(xhr.readyState === 4){
+//             if(xhr.status === 200){
+//                 const response = JSON.parse(xhr.responseText);
+//                 uploadFile(file, response.signedRequest, response.url);
+//             }
+//             else{
+//                 alert('Could not get signed URL.');
+//             }
+//         }
+//     };
+//     xhr.send();
+// }
+
+function uploadFile(file, signedRequest, url){
+    const xhr = new XMLHttpRequest();
+    xhr.open('PUT', signedRequest);
+    xhr.onreadystatechange = () => {
+        if(xhr.readyState === 4){
+            if(xhr.status === 200){
+                console.log(url);
+            }
+            else{
+                alert('Could not upload file.');
+            }
+        }
+    };
+    xhr.send(file);
+}
 
 /* Delete pic */
 router.post('/deleteImage', function (req, res) {
