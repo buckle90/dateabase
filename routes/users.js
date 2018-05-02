@@ -232,7 +232,7 @@ router.post('/upload', function (req, res) {
                         }
                     }
                 };
-                xhr.send(file);
+                xhr.send(pic);
             });
 
             // var returnData = signS3(pic);
