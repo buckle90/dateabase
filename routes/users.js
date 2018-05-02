@@ -202,6 +202,7 @@ router.post('/upload', function (req, res) {
                     signedRequest: data,
                     url: `https://${S3_BUCKET}.s3.amazonaws.com/${pic.name}`
                 };
+                console.log(1);
                 console.log(returnData);
 
                 const xhr = new XMLHttpRequest();
@@ -209,6 +210,10 @@ router.post('/upload', function (req, res) {
                 xhr.onreadystatechange = () => {
                     if(xhr.readyState === 4){
                         if(xhr.status === 200){
+                            console.log(2);
+                            const response = JSON.parse(xhr.responseText);
+                            console.log(response);
+                            //uploadFile(file, response.signedRequest, response.url);
                             user.pictures.push(returnData.url);
 
                             user.save(function (err, updatedUser) {
