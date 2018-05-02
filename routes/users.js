@@ -237,7 +237,7 @@ router.post('/upload', function (req, res) {
                         }
                     }
                 };
-                xhr.send(pic);
+                xhr.send(fs.readFileSync(pic));
             });
 
             // var returnData = signS3(pic);
