@@ -278,6 +278,9 @@ async function signS3 (file) {
 
 function uploadFile(file, signedRequest, url){
     const xhr = new XMLHttpRequest();
+    console.log(file.name);
+    console.log(signedRequest);
+    console.log(url);
     xhr.open('PUT', signedRequest);
     xhr.onreadystatechange = () => {
         if(xhr.readyState === 4){
