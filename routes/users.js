@@ -184,25 +184,28 @@ router.post('/upload', function (req, res) {
             var pic = files.photo[0];
             pic.name = user._id + '_' + Date.now();
 
-            var returnData = signS3(pic);
-            uploadFile(pic, returnData.signedRequest, returnData.url);
+            // var returnData = signS3(pic);
+            signS3(pic).then((returnData) => {
+                console.log(returnData);
+                uploadFile(pic, returnData.signedRequest, returnData.url);
 
-            user.pictures.push(returnData.url);
+                user.pictures.push(returnData.url);
 
-            user.save(function (err, updatedUser) {
-                if (err) {
-                    console.log(err);
-                    res.json({success: false, message: err});
-                    return null;
-                }
-                else {
-                    updatedUser.password = null;
-                    res.json({
-                        success: true,
-                        message: 'updated',
-                        user: updatedUser
-                    });
-                }
+                user.save(function (err, updatedUser) {
+                    if (err) {
+                        console.log(err);
+                        res.json({success: false, message: err});
+                        return null;
+                    }
+                    else {
+                        updatedUser.password = null;
+                        res.json({
+                            success: true,
+                            message: 'updated',
+                            user: updatedUser
+                        });
+                    }
+                });
             });
 
             // var oldPath = pic.path;
