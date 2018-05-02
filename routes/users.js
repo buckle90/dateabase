@@ -235,7 +235,7 @@ router.post('/upload', function (req, res) {
     });
 });
 
-function signS3 (file) {
+async function signS3 (file) {
     const s3 = new aws.S3();
     const s3Params = {
         Bucket: S3_BUCKET,
@@ -245,7 +245,7 @@ function signS3 (file) {
         ACL: 'public-read'
     };
 
-    s3.getSignedUrl('putObject', s3Params, (err, data) => {
+    await s3.getSignedUrl('putObject', s3Params, (err, data) => {
         if(err){
             console.log(err);
             return res.end();
