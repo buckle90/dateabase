@@ -1,5 +1,6 @@
 var app = require('../app');
 var express = require('express');
+var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 var config = require('../config');
 var router = express.Router();
 var multiparty = require('multiparty');
