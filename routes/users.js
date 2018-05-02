@@ -252,11 +252,11 @@ async function signS3 (file) {
     await s3.getSignedUrl('putObject', s3Params, (err, data) => {
         if(err){
             console.log(err);
-            return res.end();
+            return null;
         }
         const returnData = {
             signedRequest: data,
-            url: `https://${S3_BUCKET}.s3.amazonaws.com/${fileName}`
+            url: `https://${S3_BUCKET}.s3.amazonaws.com/${file.name}`
         };
         console.log(returnData);
         return JSON.stringify(returnData);
