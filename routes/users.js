@@ -255,6 +255,7 @@ async function signS3 (file) {
             signedRequest: data,
             url: `https://${S3_BUCKET}.s3.amazonaws.com/${fileName}`
         };
+        console.log(returnData);
         return JSON.stringify(returnData);
     });
 }
