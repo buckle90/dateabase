@@ -317,6 +317,7 @@ router.get('/signS3', (req, res) => {
             url: `https://${S3_BUCKET}.s3.amazonaws.com/${fileName}`
         };
         console.log('ahhhh');
+        console.log(process.env.AWS_ACCESS_KEY_ID);
         console.log(returnData);
         res.write(JSON.stringify(returnData));
         res.end();
