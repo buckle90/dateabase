@@ -152,6 +152,10 @@ router.post('/update', function (req, res) {
         if (req.body.age_max) user.set({age_max: req.body.age_max});
         if (req.body.distance_max) user.set({distance_max: req.body.distance_max});
         if (req.body.bio) user.set({bio: req.body.bio});
+        if (req.body.picture) {
+            user.pictures.push(req.body.picture);
+            user.set({pictures: user.pictures});
+        }
 
         user.save(function (err, updatedUser) {
             if (err) {
@@ -316,108 +320,10 @@ router.get('/signS3', (req, res) => {
             signedRequest: data,
             url: `https://${S3_BUCKET}.s3.amazonaws.com/${fileName}`
         };
-        console.log('ahhhh');
-        console.log(process.env.AWS_ACCESS_KEY_ID);
-        console.log(returnData);
         res.write(JSON.stringify(returnData));
         res.end();
     });
 });
-
-async function signS3 (file, user) {
-    const s3 = new aws.S3();
-    const s3Params = {
-        Bucket: S3_BUCKET,
-        Key: file.name,
-        Expires: 60,
-        ContentType: file.type,
-        ACL: 'public-read'
-    };
-    let data = {};
-
-    s3.getSignedUrl('putObject', s3Params, (err, data) => {
-        if(err){
-            console.log(err);
-            return null;
-        }
-        const returnData = {
-            signedRequest: data,
-            url: `https://${S3_BUCKET}.s3.amazonaws.com/${file.name}`
-        };
-        console.log(returnData);
-
-        const xhr = new XMLHttpRequest();
-        console.log(file.name);
-        console.log(returnData.signedRequest);
-        console.log(returnData.url);
-        xhr.open('PUT', returnData.signedRequest);
-        xhr.onreadystatechange = () => {
-            if(xhr.readyState === 4){
-                if(xhr.status === 200){
-                    console.log(returnData.url);
-
-                    user.pictures.push(returnData.url);
-
-                    user.save(function (err, updatedUser) {
-                        if (err) {
-                            console.log(err);
-                            res.json({success: false, message: err});
-                            return null;
-                        }
-                        else {
-                            updatedUser.password = null;
-                            res.json({
-                                success: true,
-                                message: 'updated',
-                                user: updatedUser
-                            });
-                        }
-                    });
-                }
-                else{
-                    alert('Could not upload file.');
-                }
-            }
-        };
-        xhr.send(file);
-    });
-}
-
-// function getSignedRequest(file){
-//     const xhr = new XMLHttpRequest();
-//     xhr.open('GET', `/sign-s3?file-name=${file.name}&file-type=${file.type}`);
-//     xhr.onreadystatechange = () => {
-//         if(xhr.readyState === 4){
-//             if(xhr.status === 200){
-//                 const response = JSON.parse(xhr.responseText);
-//                 uploadFile(file, response.signedRequest, response.url);
-//             }
-//             else{
-//                 alert('Could not get signed URL.');
-//             }
-//         }
-//     };
-//     xhr.send();
-// }
-
-function uploadFile(file, signedRequest, url){
-    const xhr = new XMLHttpRequest();
-    console.log(file.name);
-    console.log(signedRequest);
-    console.log(url);
-    xhr.open('PUT', signedRequest);
-    xhr.onreadystatechange = () => {
-        if(xhr.readyState === 4){
-            if(xhr.status === 200){
-                console.log(url);
-            }
-            else{
-                alert('Could not upload file.');
-            }
-        }
-    };
-    xhr.send(file);
-}
 
 /* Delete pic */
 router.post('/deleteImage', function (req, res) {
