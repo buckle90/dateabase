@@ -16,7 +16,10 @@ var UserSchema = new Schema({
     age_max: { type: Number, default: 99 },
     distance_max: { type: Number, default: 10 },
     bio: { type: String, default: "" },
-    pictures: [String]
+    pictures: [{
+        url: String,
+        reference: String
+    }]
 });
 
 module.exports = mongoose.model('User', UserSchema );
