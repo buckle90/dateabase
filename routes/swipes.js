@@ -87,6 +87,14 @@ router.post('/create', function (req, res) {
                                 }
                             });
                         }
+                        else {
+                            res.json({
+                                success: true,
+                                status: 'created',
+                                swipe: swipe,
+                                match: false
+                            });
+                        }
                     })
                 }
                 else {
