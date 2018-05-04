@@ -51,14 +51,13 @@ io.on('connection', function (socket) {
     });
 
     socket.on('message', function(data) {
-        console.log(data.message);
-        let m = data.message[0];
-
+        console.log(data);
         let message = new Message({
-            toUserID: m.toUserID,
-            fromUserID: m.fromUserID,
-            matchID: m.matchID,
-            text: m.text
+            toUserID: data.toUserID,
+            fromUserID: data.fromUserID,
+            matchID: data.matchID,
+            createdAt: data.createdAt,
+            text: data.text
         });
 
         message.save(function (err, message) {
