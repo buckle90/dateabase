@@ -38,6 +38,7 @@ router.post('/create', function (req, res) {
         toUserID: req.body.toUserID,
         fromUserID: req.body.fromUserID,
         matchID: req.body.matchID,
+        chatID: req.body.chatID,
         text: req.body.text
     });
 
@@ -55,13 +56,13 @@ router.post('/create', function (req, res) {
 });
 
 /* Get Messages by Match */
-router.post('/findByMatchID', function (req, res) {
-    var id = mongoose.Types.ObjectId(req.body.matchID);
+router.post('/findByChatID', function (req, res) {
+    let id = mongoose.Types.ObjectId(req.body.chatID);
 
     Message.aggregate([
         {
             $match: {
-                matchID: id
+                chatID: id
             }
         },
         { $sort : { createdAt : -1 } },

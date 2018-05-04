@@ -56,6 +56,7 @@ io.on('connection', function (socket) {
             toUserID: data.toUserID,
             fromUserID: data.fromUserID,
             matchID: data.matchID,
+            chatID: data.chatID,
             createdAt: data.createdAt,
             text: data.text
         });
