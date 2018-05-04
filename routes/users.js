@@ -152,8 +152,8 @@ router.post('/update', function (req, res) {
         if (req.body.age_max) user.set({age_max: req.body.age_max});
         if (req.body.distance_max) user.set({distance_max: req.body.distance_max});
         if (req.body.bio) user.set({bio: req.body.bio});
-        if (req.body.picture) {
-            user.pictures.push(req.body.picture);
+        if (req.body.picture && req.body.picture_ref) {
+            user.pictures.push({url: req.body.picture, reference: req.body.picture_ref});
             user.set({pictures: user.pictures});
         }
 
@@ -333,8 +333,9 @@ router.post('/deleteImage', function (req, res) {
             return;
         }
 
-        let id = req.body.id;
-        user.pictures.splice(user.pictures.indexOf(id), 1);
+        let url = req.body.url;
+        let pos = user.pictures.map(function(e) { return e.url; }).indexOf(url);
+        user.pictures.splice(pos, 1);
 
         user.save(function (err, updatedUser) {
             if (err) {
