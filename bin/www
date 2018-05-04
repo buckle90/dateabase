@@ -65,7 +65,7 @@ io.on('connection', function (socket) {
             console.log(err);
             if (err) return null;
             else {
-                socket.broadcast.to(id).emit('message', message);
+                socket.broadcast.to(id).emit('message', data);
             }
         });
     });
