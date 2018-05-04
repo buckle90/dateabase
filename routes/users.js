@@ -174,7 +174,7 @@ router.post('/update', function (req, res) {
     });
 });
 
-/* Upload pic */
+/*/!* Upload pic *!/
 router.post('/upload', function (req, res) {
     var form = new multiparty.Form();
 
@@ -323,7 +323,7 @@ router.get('/signS3', (req, res) => {
         res.write(JSON.stringify(returnData));
         res.end();
     });
-});
+});*/
 
 /* Delete pic */
 router.post('/deleteImage', function (req, res) {
@@ -333,33 +333,23 @@ router.post('/deleteImage', function (req, res) {
             return;
         }
 
-        var id = req.body.id;
+        let id = req.body.id;
+        user.pictures.splice(user.pictures.indexOf(id), 1);
 
-
-        fs.unlink('uploads/' + id, function (err) {
+        user.save(function (err, updatedUser) {
             if (err) {
                 console.log(err);
                 res.json({success: false, message: err});
-                return;
+                return null;
             }
-
-            user.pictures.splice(user.pictures.indexOf(id), 1);
-
-            user.save(function (err, updatedUser) {
-                if (err) {
-                    console.log(err);
-                    res.json({success: false, message: err});
-                    return null;
-                }
-                else {
-                    updatedUser.password = null;
-                    res.json({
-                        success: true,
-                        message: 'updated',
-                        user: updatedUser
-                    });
-                }
-            });
+            else {
+                updatedUser.password = null;
+                res.json({
+                    success: true,
+                    message: 'updated',
+                    user: updatedUser
+                });
+            }
         });
     });
 });
