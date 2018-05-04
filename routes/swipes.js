@@ -52,7 +52,7 @@ router.post('/create', function (req, res) {
             if (err) res.json({success: false, message: err});
             else {
                 if (req.body.liked) {
-                    Swipe.checkForMatch(swipe.user1ID, swipe.user2ID).then(matched => {
+                    Swipe.checkForMatch(swipe.user1ID, swipe.user2ID, function (matched) {
                         if (matched) {
                             let chatID = mongoose.Types.ObjectId();
                             let match1 = new Match({
