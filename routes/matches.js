@@ -86,7 +86,8 @@ router.post('/findByUserID', function (req, res) {
                     birthday: 1,
                     bio: 1,
                     pictures: 1
-                }
+                },
+                userID: req.decoded._id
             }
         }
     ], function (err, result) {

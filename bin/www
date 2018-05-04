@@ -8,6 +8,7 @@ var app = require('../app');
 var debug = require('debug')('datesbackend:server');
 var http = require('http');
 var jwt = require('jsonwebtoken');
+var Message = require('../models/message');
 
 /**
  * Get port from environment and store in Express.
@@ -43,14 +44,31 @@ io.use((socket, next) => {
 });
 
 io.on('connection', function (socket) {
-    var id = socket.handshake.query.id;
+    let id = socket.handshake.query.id;
 
     socket.on('join', function () {
         socket.join(id);
     });
 
     socket.on('message', function(data) {
-        console.log(data.message[0]);
+        console.log(data.message[0].json());
+        let m = data.message[0].json();
+
+        let message = new Message({
+            toUserID: m.toUserID,
+            fromUserID: m.fromUserID,
+            matchID: m.matchID,
+            text: m.text
+        });
+
+        message.save(function (err, message) {
+            console.log(err);
+            if (err) return null;
+            else {
+                socket.broadcast.to(id).emit('message', data.message[0]);
+            }
+        });
+
         socket.broadcast.to(id).emit('message', data.message[0]);
     });
 
