@@ -373,7 +373,8 @@ router.post('/profilesForUser', function (req, res) {
             {
                 $match: {
                     gender: user.preference,
-                    preference: user.gender
+                    preference: user.gender,
+                    _id: {$ne: user._id}
                 }
             },
             {
