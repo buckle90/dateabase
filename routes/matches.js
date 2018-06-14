@@ -96,7 +96,7 @@ router.post('/findByUserID', function (req, res) {
             res.json({success: false, message: err});
             return;
         }
-        console.log(result);
+        //console.log(result);
         res.json({
             success: true,
             message: 'success',

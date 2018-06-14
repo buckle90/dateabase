@@ -10,6 +10,14 @@ var http = require('http');
 var jwt = require('jsonwebtoken');
 var Message = require('../models/message');
 
+var admin = require('firebase-admin');
+// var serviceAccount = require('path/to/serviceAccountKey.json');
+
+admin.initializeApp({
+    credential: admin.credential.cert(JSON.parse(process.env.serviceAccountKey)),
+    databaseURL: "https://dateabase-63e4d.firebaseio.com"
+});
+
 /**
  * Get port from environment and store in Express.
  */
