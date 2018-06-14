@@ -77,26 +77,26 @@ io.on('connection', function (socket) {
             else {
                 socket.broadcast.to(id).emit('message', data.formattedMessage);
 
-                User.findById(data.toUserID, function (err, user){
-                    let message = {
-                        notification: {
-                            title: 'Test',
-                            body: 'ticles'
-                        },
-                        token: user.FCMToken
-                    };
+                User.findById(data.fromUserID, function (err, user1){
+                    User.findById(data.toUserID, function (err, user){
+                        let message = {
+                            notification: {
+                                title: "Message from " + user1.first_name,
+                                body: data.text
+                            },
+                            token: user.FCMToken
+                        };
 
-                    admin.messaging().send(message)
-                        .then((response) => {
-                            // Response is a message ID string.
-                            console.log('Successfully sent message:', response);
-                        })
-                        .catch((error) => {
-                            console.log('Error sending message:', error);
-                        });
+                        admin.messaging().send(message)
+                            .then((response) => {
+                                // Response is a message ID string.
+                                console.log('Successfully sent message:', response);
+                            })
+                            .catch((error) => {
+                                console.log('Error sending message:', error);
+                            });
+                    });
                 });
-
-
             }
         });
     });
