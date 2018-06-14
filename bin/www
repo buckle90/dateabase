@@ -58,7 +58,7 @@ io.on('connection', function (socket) {
         socket.join(id);
     });
 
-    socket.on('message', function(data) {
+    socket.on('message', function (data) {
         console.log(data);
         let message = new Message({
             toUserID: data.toUserID,
@@ -74,6 +74,23 @@ io.on('connection', function (socket) {
             if (err) return null;
             else {
                 socket.broadcast.to(id).emit('message', data.formattedMessage);
+
+                let message = {
+                    notification: {
+                        title: 'Test',
+                        body: 'ticles'
+                    },
+                    token: data.registrationToken
+                };
+
+                admin.messaging().send(message)
+                    .then((response) => {
+                        // Response is a message ID string.
+                        console.log('Successfully sent message:', response);
+                    })
+                    .catch((error) => {
+                        console.log('Error sending message:', error);
+                    });
             }
         });
     });
