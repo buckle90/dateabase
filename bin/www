@@ -12,10 +12,11 @@ var Message = require('../models/message');
 var User = require('../models/users');
 
 var admin = require('firebase-admin');
-// var serviceAccount = require('path/to/serviceAccountKey.json');
+var serviceAccount = require('/dateabase-63e4d-firebase-adminsdk-w98ew-aecf9aca20');
 
 admin.initializeApp({
-    credential: admin.credential.cert(JSON.parse(process.env.serviceAccountKey)),
+    // credential: admin.credential.cert(JSON.parse(process.env.serviceAccountKey)),
+    credential: admin.credential.cert(serviceAccount),
     databaseURL: "https://dateabase-63e4d.firebaseio.com"
 });
 
