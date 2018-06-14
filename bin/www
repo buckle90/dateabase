@@ -9,6 +9,7 @@ var debug = require('debug')('datesbackend:server');
 var http = require('http');
 var jwt = require('jsonwebtoken');
 var Message = require('../models/message');
+var User = require('../models/users');
 
 var admin = require('firebase-admin');
 // var serviceAccount = require('path/to/serviceAccountKey.json');
@@ -75,22 +76,26 @@ io.on('connection', function (socket) {
             else {
                 socket.broadcast.to(id).emit('message', data.formattedMessage);
 
-                let message = {
-                    notification: {
-                        title: 'Test',
-                        body: 'ticles'
-                    },
-                    token: data.registrationToken
-                };
+                User.findById(data.toUserID, function (err, user){
+                    let message = {
+                        notification: {
+                            title: 'Test',
+                            body: 'ticles'
+                        },
+                        token: user.FCMToken
+                    };
 
-                admin.messaging().send(message)
-                    .then((response) => {
-                        // Response is a message ID string.
-                        console.log('Successfully sent message:', response);
-                    })
-                    .catch((error) => {
-                        console.log('Error sending message:', error);
-                    });
+                    admin.messaging().send(message)
+                        .then((response) => {
+                            // Response is a message ID string.
+                            console.log('Successfully sent message:', response);
+                        })
+                        .catch((error) => {
+                            console.log('Error sending message:', error);
+                        });
+                });
+
+
             }
         });
     });
