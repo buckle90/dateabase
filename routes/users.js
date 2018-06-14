@@ -40,8 +40,9 @@ router.post('/create', function (req, res) {
 
 /* Authenticate user */
 router.post('/authenticate', function (req, res) {
-    var identifier = req.body.identifier;
-    var password = req.body.password;
+    let identifier = req.body.identifier;
+    let password = req.body.password;
+    let FCMToken = req.body.FCMToken;
 
     // find the user
     User.findOne({identifier: identifier}, function (err, user) {
@@ -62,12 +63,22 @@ router.post('/authenticate', function (req, res) {
                         //expiresInMinutes: 1440 // expires in 24 hours
                     });
 
-                    // return the information including token as JSON
-                    res.json({
-                        success: true,
-                        message: 'Authenticated',
-                        user: user,
-                        token: token
+                    user.FCMToken = FCMToken;
+                    user.save(function (err, updatedUser) {
+                        if (err) {
+                            res.json({success: false, message: err});
+                            return null;
+                        }
+                        else {
+                            updatedUser.password = null;
+                            // return the information including token as JSON
+                            res.json({
+                                success: true,
+                                message: 'Authenticated',
+                                user: user,
+                                token: token
+                            });
+                        }
                     });
                 });
             }
@@ -152,6 +163,7 @@ router.post('/update', function (req, res) {
         if (req.body.age_max) user.set({age_max: req.body.age_max});
         if (req.body.distance_max) user.set({distance_max: req.body.distance_max});
         if (req.body.bio) user.set({bio: req.body.bio});
+        if (req.body.FCMToken) user.set({FCMToken: req.body.FCMToken});
         if (req.body.picture && req.body.picture_ref) {
             user.pictures.push({url: req.body.picture, reference: req.body.picture_ref});
             user.set({pictures: user.pictures});

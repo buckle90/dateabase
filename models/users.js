@@ -19,7 +19,8 @@ var UserSchema = new Schema({
     pictures: [{
         url: String,
         reference: String
-    }]
+    }],
+    FCMToken: String
 });
 
 module.exports = mongoose.model('User', UserSchema );
