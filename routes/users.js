@@ -427,6 +427,9 @@ router.post('/profilesForUser', function (req, res) {
                     userSwiped: false,
                     profileSwipedFalse: false
                 }
+            },
+            {
+                $limit: 1
             }
         ], function (err, result) {
             if (err) {
