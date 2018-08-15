@@ -429,7 +429,7 @@ router.post('/profilesForUser', function (req, res) {
                 }
             },
             {
-                $limit: 1
+                $limit: 2
             }
         ], function (err, result) {
             if (err) {
